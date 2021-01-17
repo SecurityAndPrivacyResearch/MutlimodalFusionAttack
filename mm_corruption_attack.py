@@ -21,7 +21,7 @@ def get_adv(args):
 
   # prepare anchor image
   transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
-  image_path = '/scratch1/nvishwa/datasets/VQA/Resized_Images/val2014/COCO_val2014_000000262323.jpg'
+  image_path = 'path_to/COCO_val2014_000000262323.jpg'
   image = Image.open(image_path).convert('RGB')
   x_a = transform(image)
   x_a = x_a.unsqueeze(0).cuda()
