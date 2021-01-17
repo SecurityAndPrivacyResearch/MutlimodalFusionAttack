@@ -11,7 +11,7 @@ class VqaDataset(data.Dataset):
 
     def __init__(self, input_dir, input_vqa, max_qst_length=30, max_num_ans=10, transform=None):
         self.input_dir = input_dir
-        self.vqa = np.load(input_dir+'/'+input_vqa)
+        self.vqa = np.load(input_dir+'/'+input_vqa, allow_pickle=True)
         self.qst_vocab = text_helper.VocabDict(input_dir+'/vocab_questions.txt')
         self.ans_vocab = text_helper.VocabDict(input_dir+'/vocab_answers.txt')
         self.max_qst_length = max_qst_length
@@ -29,11 +29,12 @@ class VqaDataset(data.Dataset):
         transform = self.transform
         load_ans = self.load_ans
 
-        image = vqa[idx]['image_path']
-        image = Image.open(image).convert('RGB')
+        image_path = vqa[idx]['image_path']
+        question_id = vqa[idx]['question_id']
+        image = Image.open(image_path).convert('RGB')
         qst2idc = np.array([qst_vocab.word2idx('<pad>')] * max_qst_length)  # padded with '<pad>' in 'ans_vocab'
         qst2idc[:len(vqa[idx]['question_tokens'])] = [qst_vocab.word2idx(w) for w in vqa[idx]['question_tokens']]
-        sample = {'image': image, 'question': qst2idc}
+        sample = {'image': image, 'question': qst2idc, 'orig_question': vqa[idx]['question_tokens'], 'image_path': image_path, 'question_id': question_id}
 
         if load_ans:
             ans2idc = [ans_vocab.word2idx(w) for w in vqa[idx]['valid_answers']]
@@ -80,7 +81,8 @@ def get_loader(input_dir, input_vqa_train, input_vqa_valid, max_qst_length, max_
         phase: torch.utils.data.DataLoader(
             dataset=vqa_dataset[phase],
             batch_size=batch_size,
-            shuffle=True,
+            #shuffle=True,
+            shuffle=False,
             num_workers=num_workers)
         for phase in ['train', 'valid']}
 

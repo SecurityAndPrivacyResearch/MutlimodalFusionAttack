@@ -25,8 +25,11 @@ class ImgEncoder(nn.Module):
     def forward(self, image):
         """Extract feature vector from image vector.
         """
+        '''
         with torch.no_grad():
             img_feature = self.model(image)                  # [batch_size, vgg16(19)_fc=4096]
+        '''
+        img_feature = self.model(image)                  # [batch_size, vgg16(19)_fc=4096]
         img_feature = self.fc(img_feature)                   # [batch_size, embed_size]
 
         l2_norm = img_feature.norm(p=2, dim=1, keepdim=True).detach()
@@ -73,15 +76,24 @@ class VqaModel(nn.Module):
         self.fc2 = nn.Linear(ans_vocab_size, ans_vocab_size)
 
     def forward(self, img, qst):
-
+     
+        #img.requires_grad_(True)
+        #img.retain_grad()
         img_feature = self.img_encoder(img)                     # [batch_size, embed_size]
         qst_feature = self.qst_encoder(qst)                     # [batch_size, embed_size]
-        combined_feature = torch.mul(img_feature, qst_feature)  # [batch_size, embed_size]
-        combined_feature = self.tanh(combined_feature)
+        multimodal_combination = torch.mul(img_feature, qst_feature)  # [batch_size, embed_size]
+        combined_feature = self.tanh(multimodal_combination)
         combined_feature = self.dropout(combined_feature)
         combined_feature = self.fc1(combined_feature)           # [batch_size, ans_vocab_size=1000]
         combined_feature = self.tanh(combined_feature)
         combined_feature = self.dropout(combined_feature)
         combined_feature = self.fc2(combined_feature)           # [batch_size, ans_vocab_size=1000]
 
-        return combined_feature
+        multimodal_combination.retain_grad()
+        img_feature.retain_grad()
+        qst_feature.retain_grad()
+        #import IPython; IPython.embed(); exit(1)
+        return combined_feature, multimodal_combination, img_feature, qst_feature
+
+
+

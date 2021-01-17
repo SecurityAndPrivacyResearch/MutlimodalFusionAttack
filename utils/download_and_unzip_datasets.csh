@@ -3,10 +3,10 @@
 #########################################################
 
 # One may need to change directory for datasets like this.
-#set DATASETS_DIR = "/run/media/hoosiki/WareHouse3/mtb/datasets/VQA"
+set DATASETS_DIR = "/scratch1/nvishwa/datasets/VQA"
 
-mkdir -p "../datasets"
-set DATASETS_DIR = "../datasets"
+#mkdir -p "../datasets"
+#set DATASETS_DIR = "../datasets"
 
 ##########################################################
 
